@@ -189,8 +189,8 @@ def split_train_val_casia4Thousand():
             
             #fp.writelines(file+'\n')
 
-            if file.split('\\')[-2] == "L" :fp.writelines(file + ',' + str(int(file.split('\\')[-3])       )   +'\n') 
-            if file.split('\\')[-2] == "R" :fp.writelines(file + ',' + str(int(file.split('\\')[-3]) +1000 )   +'\n')
+            if file.split('\\')[-2] == "L" :fp.writelines(file + ',' + str(int(file.split('\\')[-3]) -1      )   +'\n') 
+            if file.split('\\')[-2] == "R" :fp.writelines(file + ',' + str(int(file.split('\\')[-3]) -1 +1000 )   +'\n')
             # 再用 excel 排序！
 
     #random.shuffle(valid_list)
@@ -395,6 +395,8 @@ def periocular_split(dataset_name,class_id):
     files = [file for file in files if 'jpg' in file]
     print("Number of files:", len(files))
 
+    f = open(anno_path + '/' + 'info.txt', 'a')
+    f.write("number of files is " + str(len(files)))
     #Aggregate data
     data_dict = defaultdict(lambda: defaultdict(lambda: list()))
     for file in files:
@@ -425,8 +427,8 @@ def periocular_split(dataset_name,class_id):
     with open(train_csv, 'w') as fp:#thousand-joint12080_train_L.csv
         for file in train_list:
             file = file.split('Dataset/images/')[1]
-            if file.split('\\')[-2] == "L" :fp.writelines(file + ',' + str(int(file.split('\\')[-3])       )   +'\n') 
-            if file.split('\\')[-2] == "R" :fp.writelines(file + ',' + str(int(file.split('\\')[-3]) + class_id )   +'\n')
+            if file.split('\\')[-2] == "L" :fp.writelines(file + ',' + str(int(file.split('\\')[-3])  -1     )   +'\n') 
+            if file.split('\\')[-2] == "R" :fp.writelines(file + ',' + str(int(file.split('\\')[-3])  - 1 + class_id )   +'\n')
             #fp.writelines(file[3:]+'\n')# test 不必生成label
             #fp.writelines(file[3:] +','+ file.split('\\')[-3]+'\n') # train 直接生成 label
 
@@ -438,7 +440,53 @@ def periocular_split(dataset_name,class_id):
             file = file.split('Dataset/images/')[1]
             fp.writelines(file+'\n')
 
+def pe_split(dataset_name,class_id):
+    image_path = '../Dataset/images/' + dataset_name 
+    if not os.path.exists(image_path):
+        print('image path do not exist........')
     
+    anno_path = '../Dataset/annotations/' + dataset_name 
+    if not os.path.exists(anno_path):
+        os.makedirs(anno_path)
+    
+    # Get files
+    files = sorted(glob(os.path.join(image_path, "*\\*\\*"), recursive=True))  # 自由选择 单双眼
+    files = [file for file in files if 'jpg' in file]
+    print("Number of files:", len(files))
+
+    #Aggregate data
+    data_dict = defaultdict(lambda: defaultdict(lambda: list()))
+    for file in files:
+        basename = os.path.basename(file)[:-4]
+        person_id = int(basename[2:5])
+        eye_id = 0 if basename[5]=='L' else 1
+        #ins_id = int(basename[-1])
+        data_dict[person_id][eye_id].append(file)
+
+    for vals in data_dict.values():
+        for val in vals.values():
+            random.shuffle(val)
+    #print(val)
+
+    
+    # Split train/valid
+    train_list = []
+    valid_list = []
+    test_list  = []
+    for key, vals in data_dict.items():
+        for val in vals.values():
+            train_samples = int(len(val) * 0.6  )# 训练集比例！
+            train_list += [val[i] for i in range(          train_samples  ) ]
+            test_list  += [val[i] for i in range( train_samples, len(val) ) ]
+    
+    #random.shuffle(train_list)
+    train_csv = anno_path +'/' + dataset_name +'_train.csv'
+    with open(train_csv, 'w') as fp:#thousand-joint12080_train_L.csv
+        for file in train_list[:3]:
+            print(file)
+            file = file.split('Dataset/images/')[1]
+            print(file.split('\\'))
+
     
 
 if __name__ == "__main__":
@@ -462,3 +510,5 @@ if __name__ == "__main__":
     dataset = 'CASIA-Iris-Lamp'
     id = 411
     periocular_split(dataset, id)
+
+    #pe_split(dataset, id)
