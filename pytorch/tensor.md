@@ -6,10 +6,13 @@
 Tensor 中文为张量，即一个多维数组，是标量、向量和矩阵对高维扩展。
 
 |数学| 计算机科学  |  抽象概念| 具像化例子|
-|---|---|---|---|
+|:---:|:---:|:---:|:---:|
 |标量|数字|点|得分，概率|
 |向量|数组|线|列表|
-|矩阵|2维数组|面|excel表格|
+|矩阵|2维数组|面|excel表格|  
+
+
+
 
 ---
 
@@ -17,7 +20,7 @@ Tensor 中文为张量，即一个多维数组，是标量、向量和矩阵对�
 
 ### torch.tensor  
 
-* format: torch.tensor是python函数 
+* format: torch.tensor()是python函数 
     ```bash
     torch.tensor(data, dtype = None, device = None, required_grad = False, pin_memory = False)
 
@@ -44,18 +47,15 @@ Tensor 中文为张量，即一个多维数组，是标量、向量和矩阵对�
 
 ## torch.Tensor
 
-* format: class类， 相当于调用Tensor类的构造函数__init__
+* format: class类， 相当于调用Tensor类的构造函数__init__()
     ```bash
     a = torch.Tensor([1,2])
     ```
 
-* 
+
 
 
 ---
-
-
-
 
 
 ## torch.repeat  
@@ -84,6 +84,23 @@ Tensor 中文为张量，即一个多维数组，是标量、向量和矩阵对�
 * 注:  
     * repeat参数的个数应大于等于tensor维度数
     * 以tensor维度数开始 逆序进行复制操作（先对tensor内部进行复制，再对外面数据进行复制）
+
+
+### torch.expand
+
+* 只能把维度为1的拓展为指定维度
+
+    ```python
+
+    # 只能扩展原tensor中维度是1的部分
+    import torch
+
+    x = torch.rand((2,1,3,1))
+    x_expand = x.expand(2,3,3,2)
+
+    x_expand1 = x.expand(-1,-1,-1,4)
+
+    ```
 
 
 
